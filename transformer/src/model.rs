@@ -1,4 +1,6 @@
 use ndarray::{s, Array1, Array2};
+use rand::Rng;
+use rand::{rngs::StdRng, SeedableRng};
 
 use crate::attention::{FeedForward, LayerNorm, Linear, MultiHeadAttention};
 use crate::decoder::{Decoder, DecoderLayer};
@@ -66,6 +68,11 @@ pub struct Transformer {
 }
 
 impl Transformer {
+    /// Build a new Transformer with a deterministic seed (for testing).
+    pub fn new_seeded(config: TransformerConfig, seed: u64) -> Self {
+        Self::new_with_rng(config, StdRng::seed_from_u64(seed))
+    }
+
     /// Build a new Transformer from config.
     ///
     /// Weight initialization follows Section 5.3:
@@ -73,7 +80,11 @@ impl Transformer {
     /// - Attention weights: Xavier uniform
     /// - Output projection: shared with tgt_embeddings transpose (Section 3.4)
     pub fn new(config: TransformerConfig) -> Self {
-        let mut rng = rand::thread_rng();
+        Self::new_with_rng(config, rand::thread_rng())
+    }
+
+    /// Build a new Transformer with a specific RNG (for deterministic testing).
+    pub fn new_with_rng<R: Rng + rand::RngCore>(config: TransformerConfig, mut rng: R) -> Self {
         let d = config.d_model;
         let n = config.n_heads;
         let df = config.d_ff;
@@ -606,7 +617,7 @@ mod tests {
 
     #[test]
     fn test_greedy_decode_produces_tokens() {
-        let t = Transformer::new(small_config());
+        let t = Transformer::new_seeded(small_config(), 42);
         let src = vec![3, 5, 7, 8, 9];
         let decoded = t.greedy_decode(&src, 20);
         assert!(!decoded.is_empty(), "greedy decode should produce tokens");
@@ -619,7 +630,7 @@ mod tests {
 
     #[test]
     fn test_beam_search_produces_tokens() {
-        let t = Transformer::new(small_config());
+        let t = Transformer::new_seeded(small_config(), 42);
         let src = vec![3, 5, 7, 8, 9];
         let decoded = t.beam_search(&src, 20, 2, 0.6);
         assert!(!decoded.is_empty(), "beam search should produce tokens");
@@ -627,7 +638,7 @@ mod tests {
 
     #[test]
     fn test_translate_convenience() {
-        let t = Transformer::new(small_config());
+        let t = Transformer::new_seeded(small_config(), 42);
         let src = vec![3, 5, 7];
         let decoded = t.translate(&src);
         assert!(!decoded.is_empty());

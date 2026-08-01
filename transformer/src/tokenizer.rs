@@ -881,7 +881,7 @@ mod tests {
             label_smoothing: 0.1,
             warmup_steps: 50,
         };
-        let transformer = crate::model::Transformer::new(config);
+        let transformer = crate::model::Transformer::new_seeded(config, 42);
 
         let result = pipeline.translate(&transformer, "hello world");
         assert!(!result.is_empty(), "Translation should produce output");
