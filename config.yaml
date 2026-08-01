@@ -1,0 +1,180 @@
+# Attention Legal AI - Configuration
+# Centralized configuration for the legal document RAG system
+
+# Application settings
+app:
+  name: "Attention Legal AI"
+  version: "1.0.0"
+  description: "RAG-based legal document query system trained on Indian labor laws"
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
+  workers: 1
+
+# Data paths
+data:
+  raw_dir: "data"
+  processed_dir: "data/processed"
+  vector_store_dir: "data/vector_store"
+  cache_dir: "data/cache"
+  supported_extensions: [".json"]
+  chunk_size: 512
+  chunk_overlap: 50
+  min_chunk_size: 100
+
+# Embedding model configuration
+embedding:
+  model_name: "sentence-transformers/all-MiniLM-L6-v2"
+  device: "cpu"  # Use "cuda" if GPU available
+  batch_size: 32
+  normalize_embeddings: true
+  max_seq_length: 512
+
+# Vector store configuration
+vector_store:
+  type: "chromadb"  # Options: "chromadb", "faiss"
+  collection_name: "legal_acts"
+  persist_directory: "data/vector_store"
+  distance_metric: "cosine"  # Options: "cosine", "l2", "ip"
+
+# Retrieval configuration
+retrieval:
+  top_k: 5
+  score_threshold: 0.3
+  search_type: "similarity"  # Options: "similarity", "mmr"
+  mmr_lambda: 0.5
+  rerank: true
+  rerank_top_k: 10
+
+# LLM Configuration
+llm:
+  # Local LLM (llama-cpp-python)
+  use_local: true
+  model_path: "models/llama-2-7b-chat.Q4_K_M.gguf"  # Download separately
+  n_ctx: 4096
+  n_gpu_layers: -1  # -1 for all layers on GPU, 0 for CPU only
+  n_batch: 512
+  temperature: 0.1
+  top_p: 0.9
+  max_tokens: 1024
+  repeat_penalty: 1.1
+  
+  # API-based LLM (fallback)
+  use_api: false
+  api_provider: "openai"  # Options: "openai", "anthropic"
+  api_model: "gpt-3.5-turbo"
+  api_temperature: 0.1
+  api_max_tokens: 1024
+
+# RAG Pipeline configuration
+rag:
+  system_prompt: |
+    You are Attention Legal AI, an expert system trained on Indian labor and employment laws.
+    You have access to 14 major Indian labor acts including:
+    - Sexual Harassment of Women at Workplace Act, 2013
+    - LLP Act, 2008
+    - Maternity Benefit Act, 1961
+    - Code on Wages, 2019
+    - Apprentices Act, 1961
+    - Industrial Employment (Standing Orders) Act, 1946
+    - Insolvency and Bankruptcy Code, 2016
+    - Inter-State Migrant Workmen Act, 1979
+    - Minimum Wages Act, 1948
+    - Payment of Gratuity Act, 1972
+    - Industrial Disputes Act, 1947
+    - Payment of Wages Act, 1936 (and 2017 Amendment)
+    
+    Provide accurate, well-cited answers based ONLY on the retrieved legal sections.
+    Always cite the specific act, section number, and relevant text.
+    If information is not in the provided context, clearly state that.
+    Format responses with clear headings, bullet points, and legal citations.
+  
+  # Prompt templates
+  query_prompt: |
+    Based on the following legal sections from Indian labor laws, answer the user's question.
+    
+    Context:
+    {context}
+    
+    Question: {question}
+    
+    Instructions:
+    1. Answer based ONLY on the provided context
+    2. Cite specific act names, section numbers, and relevant text
+    3. If the answer is not in the context, state "This information is not available in the provided legal documents."
+    4. Structure your response with clear headings
+    5. Include practical implications for employers/employees where relevant
+    
+    Answer:
+  
+  # Document types that can be generated
+  document_templates:
+    - "employment_agreement"
+    - "company_policy"
+    - "offer_letter"
+    - "termination_letter"
+    - "notice"
+    - "complaint_form"
+    - "settlement_agreement"
+    - "legal_notice"
+    - "annual_report"
+    - "standing_orders"
+
+# API configuration
+api:
+  cors_origins: ["*"]
+  rate_limit: 100  # requests per minute
+  timeout: 120  # seconds
+  max_context_length: 4000
+  
+  # Endpoints
+  endpoints:
+    query: "/api/v1/query"
+    search: "/api/v1/search"
+    acts: "/api/v1/acts"
+    sections: "/api/v1/sections"
+    health: "/health"
+    stats: "/api/v1/stats"
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {module}:{function}:{line} | {message}"
+  file: "logs/attention.log"
+  rotation: "10 MB"
+  retention: "30 days"
+  compression: "zip"
+
+# Document generation settings
+document_generation:
+  templates_dir: "templates"
+  output_dir: "generated_documents"
+  default_format: "markdown"
+  supported_formats: ["markdown", "docx", "pdf"]
+
+# Model training/finetuning (for future use)
+training:
+  enabled: false
+  base_model: "meta-llama/Llama-2-7b-chat-hf"
+  output_dir: "models/finetuned"
+  epochs: 3
+  learning_rate: 2e-4
+  batch_size: 4
+  gradient_accumulation: 4
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.1
+
+# Hugging Face deployment
+huggingface:
+  space_name: "attention-legal-ai"
+  repo_id: "your-username/attention-legal-ai"
+  private: true
+  sdk: "docker"
+  hardware: "cpu-basic"
+  
+# Evaluation settings
+evaluation:
+  test_queries_file: "data/eval/test_queries.json"
+  metrics: ["faithfulness", "answer_relevancy", "context_precision", "context_recall"]
+  ragas_enabled: false
