@@ -1763,11 +1763,7 @@ impl Default for TrainingLoopConfig {
 /// 4. Evaluates BLEU score on synthetic reference data
 /// 5. Reports throughput (tokens/sec)
 #[allow(dead_code)]
-pub fn extended_train(
-    model: &mut Transformer,
-    adam: &mut AdamState,
-    config: &TrainingLoopConfig,
-) {
+pub fn extended_train(model: &mut Transformer, adam: &mut AdamState, config: &TrainingLoopConfig) {
     let mut timer = StepTimer::new();
     let mut metrics = TrainingMetrics::new();
     let seq_len = config.bleu_eval_seq_len;

@@ -135,13 +135,7 @@ pub fn dropout(x: &Array2<f64>, p: f64, train: bool) -> Array2<f64> {
     let scale = 1.0 / keep_prob;
     let mut rng = rand::thread_rng();
     let mut mask_flat: Vec<f64> = Vec::with_capacity(total);
-    mask_flat.resize_with(total, || {
-        if rng.gen::<f64>() < p {
-            0.0
-        } else {
-            scale
-        }
-    });
+    mask_flat.resize_with(total, || if rng.gen::<f64>() < p { 0.0 } else { scale });
     let mask = ndarray::Array2::from_shape_vec((nrows, ncols), mask_flat).unwrap();
     x * &mask
 }

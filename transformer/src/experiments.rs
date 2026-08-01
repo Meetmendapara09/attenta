@@ -58,11 +58,7 @@ pub fn run_experiment(
     _batch_size: usize,
 ) -> ExperimentResult {
     let mut model = Transformer::new(config.clone());
-    let mut adam = AdamState::new(
-        config.d_model,
-        config.warmup_steps,
-        config.n_layers,
-    );
+    let mut adam = AdamState::new(config.d_model, config.warmup_steps, config.n_layers);
     for layer in &model.decoder.layers {
         adam.init_dec_layer(layer);
     }
@@ -77,11 +73,7 @@ pub fn run_experiment(
     let mut final_loss = 0.0;
 
     for step in 1..=n_steps {
-        let (src, tgt_in, tgt_out) = single_copy_sample(
-            seq_len,
-            config.src_vocab,
-            config.bos_id,
-        );
+        let (src, tgt_in, tgt_out) = single_copy_sample(seq_len, config.src_vocab, config.bos_id);
         let loss = train_step(&mut model, &src, &tgt_in, &tgt_out, &mut adam);
         final_loss = loss;
 
@@ -145,9 +137,14 @@ pub fn run_experiments(
     let mut results = Vec::new();
 
     println!("\n=== Running Table 3 Model Variation Experiments ===\n");
-    println!("Base config: d_model={}, n_heads={}, d_ff={}, n_layers={}",
-             base_config.d_model, base_config.n_heads, base_config.d_ff, base_config.n_layers);
-    println!("  dropout={}, label_smoothing={}", base_config.dropout, base_config.label_smoothing);
+    println!(
+        "Base config: d_model={}, n_heads={}, d_ff={}, n_layers={}",
+        base_config.d_model, base_config.n_heads, base_config.d_ff, base_config.n_layers
+    );
+    println!(
+        "  dropout={}, label_smoothing={}",
+        base_config.dropout, base_config.label_smoothing
+    );
     println!("  Training steps per config: {}\n", n_steps);
 
     // 1. Vary number of layers (N)
@@ -216,19 +213,29 @@ pub fn run_experiments(
 
     // Print summary table
     println!("\n\n=== Table 3 Results Summary ===");
-    println!("{:<20} {:>8} {:>8} {:>8} {:>8} {:>8} {:>12} {:>12} {:>12}",
-             "Variant", "d_model", "n_heads", "d_ff", "N", "dropout", "ls", "Loss", "PPL");
+    println!(
+        "{:<20} {:>8} {:>8} {:>8} {:>8} {:>8} {:>12} {:>12} {:>12}",
+        "Variant", "d_model", "n_heads", "d_ff", "N", "dropout", "ls", "Loss", "PPL"
+    );
     println!("{}", "-".repeat(110));
     for r in &results {
-        println!("{:<20} {:>8} {:>8} {:>8} {:>8} {:>8.1} {:>12} {:>12.4} {:>12.2}",
-                 r.label, r.d_model, r.n_heads, r.d_ff, r.n_layers,
-                 r.dropout, format!("{:.1}", r.label_smoothing), r.final_loss, r.final_perplexity);
+        println!(
+            "{:<20} {:>8} {:>8} {:>8} {:>8} {:>8.1} {:>12} {:>12.4} {:>12.2}",
+            r.label,
+            r.d_model,
+            r.n_heads,
+            r.d_ff,
+            r.n_layers,
+            r.dropout,
+            format!("{:.1}", r.label_smoothing),
+            r.final_loss,
+            r.final_perplexity
+        );
     }
 
     // Save to JSON
     if !output_path.is_empty() {
-        let json = serde_json::to_string_pretty(&results)
-            .unwrap_or_else(|_| "[]".to_string());
+        let json = serde_json::to_string_pretty(&results).unwrap_or_else(|_| "[]".to_string());
         std::fs::write(output_path, json)
             .unwrap_or_else(|_| println!("Warning: Could not write results to {}", output_path));
         println!("\nResults saved to: {}", output_path);
@@ -264,4 +271,3 @@ mod tests {
         assert!(result.training_time_secs >= 0.0);
     }
 }
-

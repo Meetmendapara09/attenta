@@ -38,7 +38,10 @@ fn main() {
     println!("  tgt_vocab:        {} (paper: 37000)", config.tgt_vocab);
     println!("  max_len:          {} (paper: 512)", config.max_len);
     println!("  dropout:          {} (paper: 0.1)", config.dropout);
-    println!("  label_smoothing:  {} (paper: 0.1)", config.label_smoothing);
+    println!(
+        "  label_smoothing:  {} (paper: 0.1)",
+        config.label_smoothing
+    );
     println!("  warmup_steps:     {} (paper: 4000)", config.warmup_steps);
     println!();
 
@@ -76,20 +79,29 @@ fn main() {
 
     println!("Running forward pass...");
     let logits_batch = transformer.forward(&src, &tgt, true);
-    println!("  Output shape: [{}, {}, {}]", batch, tgt_seq_len, config.tgt_vocab);
+    println!(
+        "  Output shape: [{}, {}, {}]",
+        batch, tgt_seq_len, config.tgt_vocab
+    );
     println!();
 
     // ------------------------------------------------------------------
     // Label smoothing loss (Section 5.4)
     // ------------------------------------------------------------------
-    println!("Label smoothing loss (Section 5.4, eps={})...", config.label_smoothing);
+    println!(
+        "Label smoothing loss (Section 5.4, eps={})...",
+        config.label_smoothing
+    );
     let mut total_loss = 0.0;
     for (logits, tgt_seq) in logits_batch.iter().zip(tgt.iter()) {
         let ls_loss =
             loss::label_smoothing_loss(logits, tgt_seq, config.label_smoothing, config.pad_id);
         let ce_loss = loss::cross_entropy_loss(logits, tgt_seq, config.pad_id);
         let ppl = loss::perplexity(ce_loss);
-        println!("  Label smoothing loss: {:.4}  |  Cross-entropy: {:.4}  |  Perplexity: {:.4}", ls_loss, ce_loss, ppl);
+        println!(
+            "  Label smoothing loss: {:.4}  |  Cross-entropy: {:.4}  |  Perplexity: {:.4}",
+            ls_loss, ce_loss, ppl
+        );
         total_loss += ls_loss;
     }
     println!("  Average loss:         {:.4}", total_loss / batch as f64);
@@ -109,7 +121,10 @@ fn main() {
     let mut batcher = batch::BucketBatcher::new(batch_data, 4, 4);
     batcher.print_stats();
     let all_batches = batcher.batches();
-    println!("  Actual batches produced: {} (each ≤4 seqs)", all_batches.len());
+    println!(
+        "  Actual batches produced: {} (each ≤4 seqs)",
+        all_batches.len()
+    );
     println!();
 
     // ==================================================================
@@ -140,15 +155,8 @@ fn main() {
 
     let data_dir = "../data/";
     println!("  Loading real dataset from: {}", data_dir);
-    let legal_dataset = data::LegalDataset::from_directory(
-        data_dir,
-        400,
-        64,
-        0,
-        1,
-        2,
-        0.9,
-    ).expect("Failed to load legal dataset from @data");
+    let legal_dataset = data::LegalDataset::from_directory(data_dir, 400, 64, 0, 1, 2, 0.9)
+        .expect("Failed to load legal dataset from @data");
     legal_dataset.print_stats();
     println!();
 
@@ -171,9 +179,14 @@ fn main() {
     let mut real_adam = real_model.init_adam();
 
     let n_steps = 100;
-    println!("  d_model={}, n_heads={}, n_layers={}, steps={}",
-             real_cfg.d_model, real_cfg.n_heads, real_cfg.n_layers, n_steps);
-    println!("  Training {} steps on real legal text with label smoothing ({})...", n_steps, real_cfg.label_smoothing);
+    println!(
+        "  d_model={}, n_heads={}, n_layers={}, steps={}",
+        real_cfg.d_model, real_cfg.n_heads, real_cfg.n_layers, n_steps
+    );
+    println!(
+        "  Training {} steps on real legal text with label smoothing ({})...",
+        n_steps, real_cfg.label_smoothing
+    );
 
     let mut timer = train::StepTimer::new();
     for step in 1..=n_steps {
@@ -187,7 +200,11 @@ fn main() {
         if step % 10 == 0 || step == n_steps {
             println!(
                 "  Step {:>3}: loss={:.4}  ppl={:.4}  lr={:.2e}  throughput={:.0} tok/s",
-                step, loss, ppl, real_adam.learning_rate(), timer.avg_throughput
+                step,
+                loss,
+                ppl,
+                real_adam.learning_rate(),
+                timer.avg_throughput
             );
         }
     }
@@ -197,10 +214,14 @@ fn main() {
     for _ in 0..val_count {
         let idx = rand::random::<usize>() % legal_dataset.train_data.len();
         let (src, tgt_in, tgt_out) = &legal_dataset.train_data[idx];
-        final_train_loss += train::train_step(&mut real_model, src, tgt_in, tgt_out, &mut real_adam);
+        final_train_loss +=
+            train::train_step(&mut real_model, src, tgt_in, tgt_out, &mut real_adam);
     }
     final_train_loss /= val_count as f64;
-    println!("  Final loss: {:.4}  (decreasing → working backprop ✓)", final_train_loss);
+    println!(
+        "  Final loss: {:.4}  (decreasing → working backprop ✓)",
+        final_train_loss
+    );
     println!();
 
     // ==================================================================
@@ -231,10 +252,18 @@ fn main() {
     println!("  Source tokens: {:?}", src_tokens);
 
     let decoded = transformer.greedy_decode(&src_tokens, 20);
-    println!("  Greedy decoded tokens: {:?}  (len={})", decoded, decoded.len());
+    println!(
+        "  Greedy decoded tokens: {:?}  (len={})",
+        decoded,
+        decoded.len()
+    );
 
     let beam_result = transformer.beam_search(&src_tokens, 20, 4, 0.6);
-    println!("  Beam search (beam=4, α=0.6): {:?}  (len={})", beam_result, beam_result.len());
+    println!(
+        "  Beam search (beam=4, α=0.6): {:?}  (len={})",
+        beam_result,
+        beam_result.len()
+    );
 
     let quick_result = transformer.translate(&src_tokens);
     println!("  translate() API (max_len=input+50): {:?}", quick_result);
@@ -252,12 +281,17 @@ fn main() {
     let viz_src: Vec<usize> = vec![3, 5, 7, 9];
     let viz_tgt: Vec<usize> = vec![1, 3, 5, 7]; // BOS + tokens
     let attn_results = visualize::extract_all_attention(&transformer, &viz_src, &viz_tgt);
-    println!("  Extracted {} attention weight matrices:", attn_results.len());
+    println!(
+        "  Extracted {} attention weight matrices:",
+        attn_results.len()
+    );
     for a in &attn_results {
         let rows = a.weights.len();
         let cols = if rows > 0 { a.weights[0].len() } else { 0 };
-        println!("    {:26} head={}  shape=[{}, {}]  src_tokens={:?}",
-                 a.layer, a.head, rows, cols, a.source_tokens);
+        println!(
+            "    {:26} head={}  shape=[{}, {}]  src_tokens={:?}",
+            a.layer, a.head, rows, cols, a.source_tokens
+        );
     }
     let _ = visualize::save_attention_viz(&attn_results, "attention_weights.json");
     println!("  Saved to: attention_weights.json");
@@ -291,16 +325,32 @@ fn main() {
     println!("--- Section 9: BLEU Score Evaluation (Table 2) ---\n");
 
     let ref_text: Vec<String> = vec![
-        "the".into(), "cat".into(), "sat".into(), "on".into(), "the".into(), "mat".into()
+        "the".into(),
+        "cat".into(),
+        "sat".into(),
+        "on".into(),
+        "the".into(),
+        "mat".into(),
     ];
     let cand_text: Vec<String> = vec![
-        "the".into(), "cat".into(), "lay".into(), "on".into(), "the".into(), "rug".into()
+        "the".into(),
+        "cat".into(),
+        "lay".into(),
+        "on".into(),
+        "the".into(),
+        "rug".into(),
     ];
     let bleu = bleu::bleu_score(&ref_text, &cand_text);
-    println!("  BLEU score (partial match): {:.4}  (expected ~0.4-0.7)", bleu);
+    println!(
+        "  BLEU score (partial match): {:.4}  (expected ~0.4-0.7)",
+        bleu
+    );
 
     let bleu_perfect = bleu::bleu_score(&ref_text, &ref_text);
-    println!("  BLEU score (perfect match): {:.4}  (expected ~1.0)", bleu_perfect);
+    println!(
+        "  BLEU score (perfect match): {:.4}  (expected ~1.0)",
+        bleu_perfect
+    );
 
     let refs = vec![
         vec!["the".into(), "cat".into(), "sat".into()],
@@ -311,12 +361,18 @@ fn main() {
         vec!["hello".into(), "world".into()],
     ];
     let corpus = bleu::corpus_bleu(&refs, &cands);
-    println!("  Corpus BLEU (perfect):     {:.4}  (expected ~1.0)", corpus);
+    println!(
+        "  Corpus BLEU (perfect):     {:.4}  (expected ~1.0)",
+        corpus
+    );
 
     let ref_ids = vec![vec![3, 4, 5, 6]];
     let pred_ids = vec![vec![3, 4, 5, 6]];
     let bleu_ids = bleu::evaluate_bleu(&ref_ids, &pred_ids);
-    println!("  BLEU (token IDs, perfect): {:.4}  (expected ~1.0)", bleu_ids);
+    println!(
+        "  BLEU (token IDs, perfect): {:.4}  (expected ~1.0)",
+        bleu_ids
+    );
     println!();
 
     let train_cfg = TransformerConfig {
@@ -358,8 +414,13 @@ fn main() {
         timer.step_end(tokens);
 
         if step % 10 == 0 || step == ext_steps {
-            println!("  Step {:>3}: loss={:.4}  ppl={:.2}  throughput={:.0} tok/s",
-                     step, loss, loss::perplexity(loss), timer.avg_throughput);
+            println!(
+                "  Step {:>3}: loss={:.4}  ppl={:.2}  throughput={:.0} tok/s",
+                step,
+                loss,
+                loss::perplexity(loss),
+                timer.avg_throughput
+            );
         }
     }
     println!();
@@ -396,22 +457,29 @@ fn main() {
     for text in &demo_texts {
         let ids = enfr_tokenizer.encode_with_special(text, 30);
         let decoded = enfr_tokenizer.decode(&ids);
-        println!("  {:<50} {:>12} {:>20}",
-                 text,
-                 ids.len(),
-                 if decoded.len() > 18 { format!("{}...", &decoded[..15]) } else { decoded });
+        println!(
+            "  {:<50} {:>12} {:>20}",
+            text,
+            ids.len(),
+            if decoded.len() > 18 {
+                format!("{}...", &decoded[..15])
+            } else {
+                decoded
+            }
+        );
     }
     println!();
 
     println!("  Translation pipeline (greedy decode + beam search):");
-    let pipeline = tokenizer::TranslationPipeline::new(
-        tokenizer::BPETokenizer::demo_enfr()
-    );
+    let pipeline = tokenizer::TranslationPipeline::new(tokenizer::BPETokenizer::demo_enfr());
     let translate_text = "the cat sat on the mat";
     let src_ids = pipeline.tokenizer.encode_with_special(translate_text, 30);
     println!("    Source: \"{}\"", translate_text);
     println!("    Source token IDs: {:?}", src_ids);
-    println!("    Source decoded:   \"{}\"", pipeline.tokenizer.decode(&src_ids));
+    println!(
+        "    Source decoded:   \"{}\"",
+        pipeline.tokenizer.decode(&src_ids)
+    );
 
     println!();
     println!("  Training BPE tokenizer from sample text...");
@@ -430,7 +498,10 @@ fn main() {
     let trained_tokenizer = tokenizer::BPETokenizer::train(
         &training_texts.iter().map(|s| *s).collect::<Vec<&str>>(),
         200,
-        0, 1, 2, 3,
+        0,
+        1,
+        2,
+        3,
     );
     trained_tokenizer.print_stats();
     println!();
@@ -461,12 +532,18 @@ fn main() {
         let mut cfg = base_exp_cfg.clone();
         match *variant {
             "N=4" => cfg.n_layers = 4,
-            "d_model=32" => { cfg.d_model = 32; cfg.d_ff = 64; cfg.n_heads = 4; }
+            "d_model=32" => {
+                cfg.d_model = 32;
+                cfg.d_ff = 64;
+                cfg.n_heads = 4;
+            }
             _ => {}
         }
         let result = experiments::run_experiment(variant, cfg, 5, 8, 1);
-        println!("    {:<20} loss={:.4}  ppl={:.2}  time={:.1}s",
-                 result.label, result.final_loss, result.final_perplexity, result.training_time_secs);
+        println!(
+            "    {:<20} loss={:.4}  ppl={:.2}  time={:.1}s",
+            result.label, result.final_loss, result.final_perplexity, result.training_time_secs
+        );
     }
     println!();
 
@@ -476,15 +553,27 @@ fn main() {
     println!("==================================================================");
     println!("  SUMMARY: All paper sections implemented and verified");
     println!("==================================================================");
-    println!("  ✓ 3.1 Encoder/Decoder Stacks (N={}, residual + LayerNorm)", config.n_layers);
-    println!("  ✓ 3.2 Scaled Dot-Product + Multi-Head Attention (h={})", config.n_heads);
-    println!("  ✓ 3.3 Position-wise Feed-Forward Networks (d_ff={})", config.d_ff);
+    println!(
+        "  ✓ 3.1 Encoder/Decoder Stacks (N={}, residual + LayerNorm)",
+        config.n_layers
+    );
+    println!(
+        "  ✓ 3.2 Scaled Dot-Product + Multi-Head Attention (h={})",
+        config.n_heads
+    );
+    println!(
+        "  ✓ 3.3 Position-wise Feed-Forward Networks (d_ff={})",
+        config.d_ff
+    );
     println!("  ✓ 3.4 Embeddings + Weight Tying (shared embeddings)");
     println!("  ✓ 3.5 Positional Encoding (sinusoidal)");
     println!("  ✓ 5.1 Bucket Batching by sequence length");
     println!("  ✓ 5.2 Synthetic WMT-like dataset generator");
     println!("  ✓ 5.3 Adam optimizer (β₁=0.9, β₂=0.98) + warmup schedule (Eq 3)");
-    println!("  ✓ 5.4 Label smoothing (ε_ls=0.1) + Dropout (p={})", config.dropout);
+    println!(
+        "  ✓ 5.4 Label smoothing (ε_ls=0.1) + Dropout (p={})",
+        config.dropout
+    );
     println!("  ✓ 5.1 BPE Tokenizer (Byte Pair Encoding for real-world text)");
     println!("  ✓ 6.1 Greedy + Beam search decoding (beam=4, α=0.6)");
     println!("  ✓ Table 2 BLEU score evaluation (n-gram precision + brevity penalty)");
@@ -494,7 +583,10 @@ fn main() {
     println!("  ✓ Backpropagation training loop with gradient clipping");
     println!("  ✓ Step timer + throughput measurement (tokens/sec)");
     println!("==================================================================");
-    println!("  Total parameters (small demo config): {}", transformer.num_parameters());
+    println!(
+        "  Total parameters (small demo config): {}",
+        transformer.num_parameters()
+    );
     println!("  85/85 unit tests passing | Release build optimized with rayon parallelism");
     println!("==================================================================");
 }

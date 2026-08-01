@@ -4,8 +4,8 @@
 /// This module generates synthetic data that mimics variable-length
 /// sequence pairs for testing the training pipeline.
 use rand::Rng;
-use std::fs;
 use serde::Deserialize;
+use std::fs;
 
 /// Configuration for synthetic dataset generation.
 #[derive(Debug, Clone)]
@@ -113,15 +113,38 @@ impl SyntheticDataset {
     /// Print dataset statistics.
     pub fn print_stats(&self) {
         println!("  SyntheticDataset stats:");
-        println!("    Vocab (src/tgt): {}/{}", self.config.src_vocab, self.config.tgt_vocab);
-        println!("    Sequence length range: {}-{}", self.config.min_len, self.config.max_len);
+        println!(
+            "    Vocab (src/tgt): {}/{}",
+            self.config.src_vocab, self.config.tgt_vocab
+        );
+        println!(
+            "    Sequence length range: {}-{}",
+            self.config.min_len, self.config.max_len
+        );
         println!("    Train samples: {}", self.train_data.len());
         println!("    Val samples: {}", self.val_data.len());
-        println!("    Task type: {}", if self.config.copy_task { "copy" } else { "translation" });
+        println!(
+            "    Task type: {}",
+            if self.config.copy_task {
+                "copy"
+            } else {
+                "translation"
+            }
+        );
 
         // Compute average lengths
-        let avg_src_len: f64 = self.train_data.iter().map(|(s, _, _)| s.len() as f64).sum::<f64>() / self.train_data.len() as f64;
-        let avg_tgt_len: f64 = self.train_data.iter().map(|(_, _, t)| t.len() as f64).sum::<f64>() / self.train_data.len() as f64;
+        let avg_src_len: f64 = self
+            .train_data
+            .iter()
+            .map(|(s, _, _)| s.len() as f64)
+            .sum::<f64>()
+            / self.train_data.len() as f64;
+        let avg_tgt_len: f64 = self
+            .train_data
+            .iter()
+            .map(|(_, _, t)| t.len() as f64)
+            .sum::<f64>()
+            / self.train_data.len() as f64;
         println!("    Avg src len: {:.1}", avg_src_len);
         println!("    Avg tgt len: {:.1}", avg_tgt_len);
     }
@@ -167,8 +190,8 @@ impl LegalDataset {
         let _rng = rand::thread_rng();
         let mut all_texts: Vec<String> = Vec::new();
 
-        let entries = fs::read_dir(dir)
-            .map_err(|e| format!("Failed to read directory '{}': {}", dir, e))?;
+        let entries =
+            fs::read_dir(dir).map_err(|e| format!("Failed to read directory '{}': {}", dir, e))?;
         for entry in entries {
             let entry = entry.map_err(|e| format!("{}", e))?;
             let path = entry.path();
@@ -249,11 +272,24 @@ impl LegalDataset {
 
     pub fn print_stats(&self) {
         println!("  LegalDataset stats:");
-        println!("    Vocab (src/tgt): {}/{}", self.config.src_vocab, self.config.tgt_vocab);
+        println!(
+            "    Vocab (src/tgt): {}/{}",
+            self.config.src_vocab, self.config.tgt_vocab
+        );
         println!("    Train samples: {}", self.train_data.len());
         println!("    Val samples:   {}", self.val_data.len());
-        let avg_src_len: f64 = self.train_data.iter().map(|(s, _, _)| s.len() as f64).sum::<f64>() / self.train_data.len() as f64;
-        let avg_tgt_len: f64 = self.train_data.iter().map(|(_, _, t)| t.len() as f64).sum::<f64>() / self.train_data.len() as f64;
+        let avg_src_len: f64 = self
+            .train_data
+            .iter()
+            .map(|(s, _, _)| s.len() as f64)
+            .sum::<f64>()
+            / self.train_data.len() as f64;
+        let avg_tgt_len: f64 = self
+            .train_data
+            .iter()
+            .map(|(_, _, t)| t.len() as f64)
+            .sum::<f64>()
+            / self.train_data.len() as f64;
         println!("    Avg src len: {:.1}", avg_src_len);
         println!("    Avg tgt len: {:.1}", avg_tgt_len);
     }
@@ -362,4 +398,3 @@ mod tests {
         assert!(config.min_len <= config.max_len);
     }
 }
-

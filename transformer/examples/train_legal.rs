@@ -7,20 +7,24 @@
 //! Paper: Section 5.1 — "We used the WMT 2014 English-German dataset..."
 //! Here we train on Indian labor law documents instead.
 
+use attenta::checkpoint::save_checkpoint;
 use attenta::data::{LegalDataset, SyntheticDatasetConfig};
 use attenta::loss::perplexity;
 use attenta::model::{Transformer, TransformerConfig};
-use attenta::train::{StepTimer, TrainingMetrics};
-use attenta::checkpoint::save_checkpoint;
 use attenta::train::train_step;
+use attenta::train::{StepTimer, TrainingMetrics};
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let n_steps: usize = args.get(1)
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(100);
-    let data_dir: String = args.get(2).cloned().unwrap_or_else(|| "../data/".to_string());
-    let checkpoint_dir: String = args.get(3).cloned().unwrap_or_else(|| "./checkpoints/".to_string());
+    let n_steps: usize = args.get(1).and_then(|s| s.parse().ok()).unwrap_or(100);
+    let data_dir: String = args
+        .get(2)
+        .cloned()
+        .unwrap_or_else(|| "../data/".to_string());
+    let checkpoint_dir: String = args
+        .get(3)
+        .cloned()
+        .unwrap_or_else(|| "./checkpoints/".to_string());
 
     println!("==================================================================");
     println!("  Attenta — Training on Indian Legal Documents");
@@ -34,14 +38,14 @@ fn main() {
     // Load and tokenize legal data
     println!("\n[1/4] Loading legal dataset...");
     let legal_dataset = LegalDataset::from_directory(
-        &data_dir,
-        800,    // vocab_size
-        64,     // max_len
-        0,      // pad_id
-        1,      // bos_id
-        2,      // eos_id
-        0.9,    // train_ratio
-    ).expect("Failed to load legal dataset");
+        &data_dir, 800, // vocab_size
+        64,  // max_len
+        0,   // pad_id
+        1,   // bos_id
+        2,   // eos_id
+        0.9, // train_ratio
+    )
+    .expect("Failed to load legal dataset");
 
     legal_dataset.print_stats();
 
@@ -63,7 +67,10 @@ fn main() {
     };
 
     println!("\n[2/4] Building Transformer model...");
-    println!("  d_model={}, n_heads={}, n_layers={}, d_ff={}", config.d_model, config.n_heads, config.n_layers, config.d_ff);
+    println!(
+        "  d_model={}, n_heads={}, n_layers={}, d_ff={}",
+        config.d_model, config.n_heads, config.n_layers, config.d_ff
+    );
     println!("  Parameters: {:>10}", {
         let m = Transformer::new(config.clone());
         m.num_parameters()
@@ -93,20 +100,32 @@ fn main() {
         if step % 10 == 0 || step == n_steps {
             println!(
                 "  Step {:>5}/{} | loss={:.4} | ppl={:.2} | lr={:.2e} | {:.0} tok/s",
-                step, n_steps, loss, ppl, adam.learning_rate(), timer.avg_throughput
+                step,
+                n_steps,
+                loss,
+                ppl,
+                adam.learning_rate(),
+                timer.avg_throughput
             );
         }
 
         // Checkpoint every 50 steps
         if step % 50 == 0 {
-            let ckpt_path = format!("{}/checkpoint_step_{}.json", checkpoint_dir.trim_end_matches('/'), step);
+            let ckpt_path = format!(
+                "{}/checkpoint_step_{}.json",
+                checkpoint_dir.trim_end_matches('/'),
+                step
+            );
             let _ = save_checkpoint(&model, &ckpt_path);
             println!("  Saved checkpoint: {}", ckpt_path);
         }
     }
 
     // Save final checkpoint
-    let final_path = format!("{}/checkpoint_final.json", checkpoint_dir.trim_end_matches('/'));
+    let final_path = format!(
+        "{}/checkpoint_final.json",
+        checkpoint_dir.trim_end_matches('/')
+    );
     save_checkpoint(&model, &final_path).expect("Failed to save final checkpoint");
     println!("\n  Final checkpoint saved: {}", final_path);
 
@@ -120,7 +139,11 @@ fn main() {
             val_loss += train_step(&mut model, src, tgt_in, tgt_out, &mut adam);
         }
         val_loss /= val_count as f64;
-        println!("  Validation loss: {:.4} | ppl: {:.2}", val_loss, perplexity(val_loss));
+        println!(
+            "  Validation loss: {:.4} | ppl: {:.2}",
+            val_loss,
+            perplexity(val_loss)
+        );
     }
 
     println!("\n==================================================================");

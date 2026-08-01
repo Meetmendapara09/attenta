@@ -6,10 +6,12 @@
 # Development process files (not part of the project deliverable)
 PRD.MD
 TODO.md
-UPDATE_PLAN.MD
+UPDATE_PLAN.md
 .commandcode/
 attention_text.txt
 attention.pdf
+requirements.txt
+config.yaml
 
 # IDE
 .idea/
