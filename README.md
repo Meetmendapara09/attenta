@@ -6,7 +6,6 @@
 
 **Attenta** — a from-scratch Rust implementation of the Transformer architecture from the
 landmark paper ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762) (Vaswani et al., 2017).
-Trained on Indian labor law documents for legal document processing.
 
 ## What is Attenta?
 
@@ -70,12 +69,9 @@ attention/                        # Project root
 │   ├── the_industrial_disputes_act_1947.json
 │   ├── wages 2017.json
 │   └── The Apprentices Act1961.json
-├── config.yaml                    # Configuration (Legal AI RAG system)
+├── config.yaml                    # Configuration
 ├── requirements.txt               # Python dependencies (for reference)
 ├── README.md                      # This file
-├── PRD.MD                         # Product Requirements Document
-├── TODO.md                        # Implementation checklist
-└── UPDATE_PLAN.md                 # Update plan and roadmap
 ```
 
 ## Quick Start
