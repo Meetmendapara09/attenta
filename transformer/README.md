@@ -22,20 +22,20 @@ See the [root README](https://github.com/Meetmendapara09/attenta) for project-le
 
 | Module | Paper Section | Purpose |
 |--------|--------------|---------|
-| `model.rs` | §3.1-3.5 | Transformer model, config, positional encoding |
-| `attention.rs` | §3.2-3.3 | Scaled dot-product, multi-head, FFN, layer norm |
-| `encoder.rs` | §3.1 | Encoder layer + stack |
-| `decoder.rs` | §3.1 | Decoder layer + stack |
+| `model.rs` | Section3.1-3.5 | Transformer model, config, positional encoding |
+| `attention.rs` | Section3.2-3.3 | Scaled dot-product, multi-head, FFN, layer norm |
+| `encoder.rs` | Section3.1 | Encoder layer + stack |
+| `decoder.rs` | Section3.1 | Decoder layer + stack |
 | `tensor_ops.rs` | - | matmul, softmax, dropout, init |
-| `backward.rs` | §5.2 | Gradient computation |
-| `train.rs` | §5.2-5.3 | Training loop, Adam, StepTimer, metrics |
-| `loss.rs` | §5.4 | Label smoothing, cross-entropy, perplexity |
-| `optim.rs` | §5.3 | Adam + warmup LR schedule (Eq 3) |
-| `bleu.rs` | §6.2 | BLEU-4 with n-gram precision + brevity penalty |
-| `checkpoint.rs` | §6.1 | Save/load/average checkpoints |
+| `backward.rs` | Section5.2 | Gradient computation |
+| `train.rs` | Section5.2-5.3 | Training loop, Adam, StepTimer, metrics |
+| `loss.rs` | Section5.4 | Label smoothing, cross-entropy, perplexity |
+| `optim.rs` | Section5.3 | Adam + warmup LR schedule (Eq 3) |
+| `bleu.rs` | Section6.2 | BLEU-4 with n-gram precision + brevity penalty |
+| `checkpoint.rs` | Section6.1 | Save/load/average checkpoints |
 | `visualize.rs` | Fig 3-5 | Attention weight extraction |
-| `batch.rs` | §5.1 | Bucket batching by sequence length |
-| `data.rs` | §5.1 | Legal dataset loading from JSON |
-| `tokenizer.rs` | §5.1 | BPE tokenizer |
+| `batch.rs` | Section5.1 | Bucket batching by sequence length |
+| `data.rs` | Section5.1 | Legal dataset loading from JSON |
+| `tokenizer.rs` | Section5.1 | BPE tokenizer |
 | `experiments.rs` | Table 3 | Model variation experiments |
 | `utils.rs` | - | Public API re-exports |

@@ -56,10 +56,11 @@ attention/                        # Project root
 - Positional encoding (sinusoidal)
 - Layer normalization + residual connections
 - Adam optimizer with warmup LR schedule (Eq 3)
-- Label smoothing cross-entropy (§5.4)
-- Greedy + beam search decoding (§6.1)
-- BLEU-4 evaluation
-- Checkpoint save/load/averaging (§6.1)
+- Label smoothing cross-entropy (Section 5.4)
+- Greedy + beam search decoding (Section 6.1)
+- Attention visualization (Figures 3-5)
+- BPE tokenization and bucket batching
+- Checkpoint save/load/averaging (Section 6.1)
 - Attention visualization (Figures 3-5)
 - BPE tokenization + bucket batching
 - 85 unit tests covering all components

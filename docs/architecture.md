@@ -70,4 +70,4 @@ lr = d_model^(-0.5) * min(step^(-0.5), step * warmup_steps^(-1.5))
 - **Batch RNG in dropout**: Single RNG instance per dropout call (was per-element)
 - **Numerically stable softmax**: Max-subtraction prevents overflow
 - **Release build**: `opt-level=3` with link-time optimization
-- **Weight tying**: Reduces parameters and improves generalization (§3.4)
+- **Weight tying**: Reduces parameters and improves generalization (Section 3.4)

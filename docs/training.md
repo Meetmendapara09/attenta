@@ -2,7 +2,7 @@
 
 ## Configuration
 
-Default configuration follows the paper's base model (§5.3, Table 3):
+Default configuration follows the paper's base model (Section 5.3, Table 3):
 
 ```rust
 TransformerConfig {
