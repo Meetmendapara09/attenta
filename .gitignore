@@ -1,0 +1,27 @@
+# Build artifacts
+/target
+**/target/
+**/checkpoints/
+
+# Development process files (not part of the project deliverable)
+PRD.MD
+TODO.md
+UPDATE_PLAN.MD
+.commandcode/
+attention_text.txt
+attention.pdf
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Environment
+.env
+*.pem
